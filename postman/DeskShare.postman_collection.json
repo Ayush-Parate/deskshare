@@ -1,0 +1,235 @@
+{
+  "info": {
+    "_postman_id": "b7f4e8bb-5b2d-4e2e-8c5d-deskshare",
+    "name": "DeskShare API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "spaceId",
+      "value": ""
+    },
+    {
+      "key": "bookingId",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Demo User\", \"email\": \"newuser@example.com\", \"password\": \"User@123\", \"role\": \"user\"}"
+            },
+            "url": "{{baseUrl}}/api/auth/register"
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"user@deskshare.com\", \"password\": \"User@123\"}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Spaces",
+      "item": [
+        {
+          "name": "List Spaces",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/spaces"
+          }
+        },
+        {
+          "name": "Search Meeting Room",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/spaces/search?keyword=meeting-room"
+          }
+        },
+        {
+          "name": "Get Space",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/spaces/{{spaceId}}"
+          }
+        },
+        {
+          "name": "Create Space",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "New Meeting Room",
+                  "type": "text"
+                },
+                {
+                  "key": "type",
+                  "value": "meeting-room",
+                  "type": "text"
+                },
+                {
+                  "key": "location",
+                  "value": "Mumbai",
+                  "type": "text"
+                },
+                {
+                  "key": "pricePerHour",
+                  "value": "500",
+                  "type": "text"
+                },
+                {
+                  "key": "capacity",
+                  "value": "6",
+                  "type": "text"
+                },
+                {
+                  "key": "amenities",
+                  "value": "WiFi",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/spaces"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bookings",
+      "item": [
+        {
+          "name": "Create Booking",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"spaceId\": \"{{spaceId}}\", \"startTime\": \"2026-10-05T10:00:00.000Z\", \"endTime\": \"2026-10-05T12:00:00.000Z\", \"notes\": \"Project meeting\"}"
+            },
+            "url": "{{baseUrl}}/api/bookings"
+          }
+        },
+        {
+          "name": "Get Booking",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/bookings/{{bookingId}}"
+          }
+        },
+        {
+          "name": "Cancel Booking",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/bookings/{{bookingId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Memberships",
+      "item": [
+        {
+          "name": "Purchase Membership",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"plan\": \"premium\"}"
+            },
+            "url": "{{baseUrl}}/api/memberships"
+          }
+        },
+        {
+          "name": "Get User Memberships",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/memberships/user/{{userId}}"
+          }
+        }
+      ]
+    }
+  ]
+}
