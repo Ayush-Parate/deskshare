@@ -9,4 +9,3 @@ coverage/
 serviceAccountKey.json
 firebase-service-account.json
 uploads/
-package-lock.json

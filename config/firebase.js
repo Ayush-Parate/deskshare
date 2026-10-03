@@ -13,19 +13,24 @@ function initializeFirebase() {
     return null;
   }
 
-  const privateKey = FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n");
+  try {
+    const privateKey = FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n");
 
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: FIREBASE_PROJECT_ID,
-      clientEmail: FIREBASE_CLIENT_EMAIL,
-      privateKey
-    }),
-    storageBucket: process.env.FIREBASE_STORAGE_BUCKET
-  });
+    admin.initializeApp({
+      credential: admin.credential.cert({
+        projectId: FIREBASE_PROJECT_ID,
+        clientEmail: FIREBASE_CLIENT_EMAIL,
+        privateKey
+      }),
+      storageBucket: process.env.FIREBASE_STORAGE_BUCKET
+    });
 
-  firebaseReady = true;
-  return admin;
+    firebaseReady = true;
+    return admin;
+  } catch (error) {
+    console.warn("Failed to initialize Firebase Admin SDK:", error.message);
+    return null;
+  }
 }
 
 module.exports = { initializeFirebase };
