@@ -3,9 +3,21 @@ const express = require("express");
 const { body } = require("express-validator");
 const validate = require("../middleware/validationMiddleware");
 const { authenticate } = require("../middleware/authMiddleware");
-const { createBooking, getBooking, cancelBooking } = require("../controllers/bookingController");
+const { createBooking, getBooking, cancelBooking, getBookings } = require("../controllers/bookingController");
 
 const router = express.Router();
+
+/**
+ * @swagger
+ * /api/bookings:
+ *   get:
+ *     tags: [Bookings]
+ *     security: [{ bearerAuth: [] }]
+ *     summary: List bookings for current user or owner
+ *     responses:
+ *       200: { description: List of bookings }
+ */
+router.get("/", authenticate, getBookings);
 
 /**
  * @swagger

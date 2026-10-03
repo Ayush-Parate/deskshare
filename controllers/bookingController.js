@@ -93,3 +93,26 @@ exports.cancelBooking = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.getBookings = async (req, res, next) => {
+  try {
+    const filter = {};
+    if (req.user.role === "owner") {
+      const mySpaces = await Space.find({ owner: req.user._id }).select("_id");
+      const spaceIds = mySpaces.map((s) => s._id);
+      filter.$or = [{ user: req.user._id }, { space: { $in: spaceIds } }];
+    } else if (req.user.role !== "admin") {
+      filter.user = req.user._id;
+    }
+
+    const bookings = await Booking.find(filter)
+      .populate("user", "name email")
+      .populate("space", "name type location pricePerHour imageUrls")
+      .sort({ createdAt: -1 });
+
+    res.json({ success: true, count: bookings.length, data: bookings });
+  } catch (error) {
+    next(error);
+  }
+};
+

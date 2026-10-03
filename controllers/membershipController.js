@@ -53,3 +53,13 @@ exports.getUserMemberships = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.getMyMemberships = async (req, res, next) => {
+  try {
+    const memberships = await Membership.find({ user: req.user._id }).sort({ createdAt: -1 });
+    res.json({ success: true, count: memberships.length, data: memberships });
+  } catch (error) {
+    next(error);
+  }
+};
+

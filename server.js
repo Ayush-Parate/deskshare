@@ -12,13 +12,16 @@ const spaceRoutes = require("./routes/spaceRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
 const membershipRoutes = require("./routes/membershipRoutes");
 
+const path = require("path");
+
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, "public")));
 
-app.get("/", (req, res) => {
+app.get("/api", (req, res) => {
   res.json({
     success: true,
     message: "DeskShare API is running",
@@ -38,6 +41,14 @@ app.use("/api/memberships", membershipRoutes);
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+// Client-side routing fallback: serve index.html for non-API GET requests
+app.get("*", (req, res, next) => {
+  if (req.path.startsWith("/api") || req.path.startsWith("/api-docs") || req.path === "/health") {
+    return next();
+  }
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -54,7 +65,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 4000;
 
 connectDB()
   .then(() => {

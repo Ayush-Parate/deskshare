@@ -2,9 +2,23 @@
 const express = require("express");
 const { body } = require("express-validator");
 const validate = require("../middleware/validationMiddleware");
-const { register, login } = require("../controllers/authController");
+const { register, login, getMe } = require("../controllers/authController");
+const { authenticate } = require("../middleware/authMiddleware");
 
 const router = express.Router();
+
+/**
+ * @swagger
+ * /api/auth/me:
+ *   get:
+ *     tags: [Auth]
+ *     security: [{ bearerAuth: [] }]
+ *     summary: Get current authenticated user profile
+ *     responses:
+ *       200: { description: Current user profile }
+ *       401: { description: Unauthorized }
+ */
+router.get("/me", authenticate, getMe);
 
 /**
  * @swagger

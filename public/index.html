@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="DeskShare — Modern coworking space booking platform. Book hot desks, private offices, and executive meeting rooms with real-time availability and conflict detection.">
+  <title>DeskShare — Premium Coworking Space Booking</title>
+  
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%236366f1%22/><path d=%22M25 70V40l25-15 25 15v30H55V52H45v18H25z%22 fill=%22white%22/></svg>">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- Top Demo Bar for One-Click Testing -->
+  <div class="demo-bar">
+    <div class="container demo-bar-inner">
+      <div class="demo-bar-text">
+        <span>⚡ <strong>Quick Demo Mode:</strong> Test full platform features instantly without registering:</span>
+      </div>
+      <div class="demo-bar-btns">
+        <button class="btn btn-outline btn-sm" onclick="quickDemoLogin('user')">
+          👤 Log in as Demo Member
+        </button>
+        <button class="btn btn-primary btn-sm" onclick="quickDemoLogin('owner')">
+          👑 Log in as Space Owner
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container nav-container">
+      <a href="#" class="logo" onclick="navigateTo('spaces'); return false;">
+        <div class="logo-icon">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm6 12H6v-1.4c0-2 4-3.1 6-3.1s6 1.1 6 3.1V18z"/>
+          </svg>
+        </div>
+        <span>DeskShare</span>
+        <span class="logo-badge">Live API</span>
+      </a>
+
+      <nav>
+        <ul class="nav-links">
+          <li><a href="#spaces" class="nav-item active" data-target="spaces" onclick="navigateTo('spaces'); return false;">Workspaces</a></li>
+          <li><a href="#memberships" class="nav-item" data-target="memberships" onclick="navigateTo('memberships'); return false;">Memberships</a></li>
+          <li><a href="#dashboard" class="nav-item" id="nav-dashboard-link" data-target="dashboard" style="display: none;" onclick="navigateTo('dashboard'); return false;">My Dashboard</a></li>
+          <li><a href="/api-docs" target="_blank" class="nav-item">API Docs ↗</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <!-- Auth buttons when not logged in -->
+        <div id="nav-auth-btns" style="display: flex; gap: 8px;">
+          <button class="btn btn-secondary btn-sm" onclick="openAuthModal('login')">Log In</button>
+          <button class="btn btn-primary btn-sm" onclick="openAuthModal('register')">Sign Up</button>
+        </div>
+
+        <!-- User profile badge when logged in -->
+        <div id="nav-user-menu" class="user-menu" style="display: none;">
+          <div class="user-avatar" id="user-avatar-text">U</div>
+          <div class="user-details">
+            <span class="user-name" id="user-display-name">User</span>
+            <span class="user-role-badge" id="user-display-role">user</span>
+          </div>
+          <button class="btn btn-outline btn-sm" style="margin-left: 6px; padding: 4px 10px;" onclick="navigateTo('dashboard')">Dashboard</button>
+          <button class="btn btn-secondary btn-sm" style="padding: 4px 8px;" title="Log out" onclick="handleLogout()">✕</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="container">
+        <div class="hero-tag">
+          <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#10b981;"></span>
+          Intelligent Coworking Space Platform
+        </div>
+        <h1 class="hero-title">
+          Flexible Workspaces for <span>Modern Creators & Teams</span>
+        </h1>
+        <p class="hero-subtitle">
+          Book executive meeting rooms, ergonomic hot desks, and private suites with instant automated conflict checking and seamless memberships.
+        </p>
+
+        <!-- Stats Strip -->
+        <div class="stats-strip">
+          <div class="stat-item">
+            <span class="stat-num">100%</span>
+            <span class="stat-lbl">Real-Time Sync</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-num">0s</span>
+            <span class="stat-lbl">Conflict Guarantee</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-num">24/7</span>
+            <span class="stat-lbl">Card & Pass Access</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-num">Flexible</span>
+            <span class="stat-lbl">Hourly / Monthly</span>
+          </div>
+        </div>
+
+        <!-- Filter & Search Card -->
+        <div class="filter-card">
+          <div class="filter-row-top">
+            <div class="search-input-wrap">
+              <svg class="search-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" id="search-input" class="search-input" placeholder="Search by name, location, or amenities (e.g. Mumbai, Projector, WiFi)..." />
+            </div>
+            <button class="btn btn-secondary" onclick="resetFilters()">Reset</button>
+          </div>
+
+          <div class="filter-row-bottom">
+            <div class="type-pills">
+              <button class="type-pill active" data-type="all">All Types</button>
+              <button class="type-pill" data-type="hot-desk">💻 Hot Desk</button>
+              <button class="type-pill" data-type="meeting-room">👥 Meeting Room</button>
+              <button class="type-pill" data-type="private-office">🏢 Private Office</button>
+              <button class="type-pill" data-type="conference-room">🎤 Conference Room</button>
+              <button class="type-pill" data-type="desk">🪑 Desk</button>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:8px;">
+              <label for="sort-select" style="font-size:0.82rem; color:var(--text-muted);">Sort by:</label>
+              <select id="sort-select" class="sort-select">
+                <option value="default">Featured</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+                <option value="capacity-desc">Highest Capacity</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Spaces Section -->
+    <section id="section-spaces" class="section">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">Available Workspaces</h2>
+            <p class="section-desc">Select a space to book instantly by the hour.</p>
+          </div>
+          <div id="spaces-count" style="font-size:0.88rem; color:var(--text-muted); font-weight:600;">
+            Loading spaces...
+          </div>
+        </div>
+
+        <div id="spaces-grid" class="spaces-grid">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Memberships Section -->
+    <section id="section-memberships" class="section" style="background: rgba(15, 23, 42, 0.4); border-top: 1px solid var(--border);">
+      <div class="container">
+        <div class="section-head" style="text-align: center; justify-content: center; flex-direction: column;">
+          <h2 class="section-title">Monthly Memberships</h2>
+          <p class="section-desc">Unlock recurring access, exclusive lounges, and member discounts.</p>
+        </div>
+
+        <div class="pricing-grid">
+          <!-- Basic Plan -->
+          <div class="pricing-card">
+            <h3 class="plan-name">Basic Member</h3>
+            <p class="plan-desc">For freelancers and remote pros needing flexible weekly access.</p>
+            <div class="plan-price">
+              <span class="price-currency">₹</span>
+              <span class="price-amount">999</span>
+              <span class="price-period">/ month</span>
+            </div>
+            <ul class="plan-features">
+              <li class="plan-feature">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                5 Days Hot Desk access / month
+              </li>
+              <li class="plan-feature">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                High-Speed Gigabit WiFi
+              </li>
+              <li class="plan-feature">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                Complimentary Gourmet Coffee
+              </li>
+              <li class="plan-feature">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                Business Hours Access (9am - 8pm)
+              </li>
+            </ul>
+            <button class="btn btn-secondary" onclick="purchaseMembership('basic')">Choose Basic Plan</button>
+          </div>
+
+          <!-- Premium Plan (Featured) -->
+          <div class="pricing-card featured">
+            <div class="popular-badge">⭐ Most Popular</div>
+            <h3 class="plan-name">Premium Resident</h3>
+            <p class="plan-desc">For active professionals and entrepreneurs who require daily access.</p>
+            <div class="plan-price">
+              <span class="price-currency">₹</span>
+              <span class="price-amount">1,999</span>
+              <span class="price-period">/ month</span>
+            </div>
+            <ul class="plan-features">
+              <li class="plan-feature">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                Unlimited Hot Desk Access
+              </li>
+              <li class="plan-feature">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                5 Free Meeting Room Hours / month
+              </li>
+              <li class="plan-feature">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                24/7 Keycard Building Access
+              </li>
+              <li class="plan-feature">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                Mailing Address & Locker Access
+              </li>
+              <li class="plan-feature">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                Community Workshops & Mixers
+              </li>
+            </ul>
+            <button class="btn btn-primary" onclick="purchaseMembership('premium')">Choose Premium Plan</button>
+          </div>
+
+          <!-- Team Plan -->
+          <div class="pricing-card">
+            <h3 class="plan-name">Team Dedicated</h3>
+            <p class="plan-desc">For growing startups and remote team hubs needing collaborative space.</p>
+            <div class="plan-price">
+              <span class="price-currency">₹</span>
+              <span class="price-amount">4,999</span>
+              <span class="price-period">/ month</span>
+            </div>
+            <ul class="plan-features">
+              <li class="plan-feature">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                Dedicated Team Pod (Up to 4 members)
+              </li>
+              <li class="plan-feature">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                15 Free Conference Room Hours
+              </li>
+              <li class="plan-feature">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                Priority Booking & Concierge Support
+              </li>
+              <li class="plan-feature">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                Guest Passes & Printing Allocation
+              </li>
+            </ul>
+            <button class="btn btn-secondary" onclick="purchaseMembership('team')">Choose Team Plan</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- User Dashboard Section -->
+    <section id="section-dashboard" class="section" style="display: none;">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">My Dashboard</h2>
+            <p class="section-desc">Manage your workspace bookings, memberships, and listed spaces.</p>
+          </div>
+          <div>
+            <button class="btn btn-secondary btn-sm" onclick="navigateTo('spaces')">← Back to Spaces</button>
+          </div>
+        </div>
+
+        <!-- Dashboard Sub-Tabs -->
+        <div class="dashboard-nav">
+          <button class="dash-tab-btn active" data-tab="bookings" onclick="switchDashboardTab('bookings')">
+            📅 My Bookings <span class="tab-badge" id="badge-bookings-count">0</span>
+          </button>
+          <button class="dash-tab-btn" data-tab="memberships" onclick="switchDashboardTab('memberships')">
+            🎟️ Memberships <span class="tab-badge" id="badge-memberships-count">0</span>
+          </button>
+          <button class="dash-tab-btn" data-tab="spaces" id="dash-tab-spaces" style="display: none;" onclick="switchDashboardTab('spaces')">
+            🏢 Owner Spaces <span class="tab-badge" id="badge-spaces-count">0</span>
+          </button>
+        </div>
+
+        <!-- Tab 1: Bookings Content -->
+        <div id="dash-bookings-sec">
+          <div id="dash-bookings-container" class="bookings-list">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Tab 2: Memberships Content -->
+        <div id="dash-memberships-sec" style="display: none;">
+          <div id="dash-memberships-container" class="bookings-list">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Tab 3: Owner Spaces Content -->
+        <div id="dash-spaces-sec" style="display: none;">
+          <div id="dash-spaces-container">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modals -->
+
+  <!-- 1. Booking Modal -->
+  <div id="booking-modal" class="modal-backdrop">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Book Coworking Space</h3>
+        <button class="modal-close" onclick="closeModal('booking-modal')">✕</button>
+      </div>
+      <form id="booking-form">
+        <div class="modal-body">
+          <!-- Space Summary -->
+          <div style="display:flex; gap:16px; align-items:center; background:rgba(255,255,255,0.04); padding:12px; border-radius:var(--radius-md); margin-bottom:18px;">
+            <img id="booking-space-thumb" src="" alt="" style="width:60px; height:60px; border-radius:var(--radius-sm); object-fit:cover;" />
+            <div>
+              <h4 id="booking-space-title" style="font-size:1.05rem; font-weight:700;">Workspace</h4>
+              <div id="booking-space-loc" style="font-size:0.82rem; color:var(--text-muted);">Location</div>
+              <div id="booking-space-rate" style="font-size:0.88rem; font-weight:700; color:#818cf8; margin-top:2px;">₹0 / hr</div>
+            </div>
+          </div>
+
+          <!-- Date/Time Range -->
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="booking-start-time">Start Time</label>
+              <input type="datetime-local" id="booking-start-time" class="form-control" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="booking-end-time">End Time</label>
+              <input type="datetime-local" id="booking-end-time" class="form-control" required />
+            </div>
+          </div>
+
+          <!-- Live Price Calculator -->
+          <div class="calc-card">
+            <div>
+              <div class="calc-label">Duration & Total Cost</div>
+              <div class="calc-breakdown">Calculated duration: <strong id="calc-hours">0 hrs</strong></div>
+            </div>
+            <div class="calc-total" id="calc-total-price">₹0</div>
+          </div>
+
+          <!-- Notes -->
+          <div class="form-group">
+            <label class="form-label" for="booking-notes">Special Requests / Notes (Optional)</label>
+            <textarea id="booking-notes" class="form-control" rows="2" placeholder="e.g. Projector setup required, quiet zone needed..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('booking-modal')">Cancel</button>
+          <button type="submit" id="btn-confirm-booking" class="btn btn-primary">Confirm Booking</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. Authentication Modal (Login & Register) -->
+  <div id="auth-modal" class="modal-backdrop">
+    <div class="modal-dialog" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Welcome to DeskShare</h3>
+        <button class="modal-close" onclick="closeModal('auth-modal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <!-- Auth Tabs -->
+        <div class="auth-tabs">
+          <button type="button" class="auth-tab-btn active" id="auth-tab-login" onclick="openAuthModal('login')">Log In</button>
+          <button type="button" class="auth-tab-btn" id="auth-tab-register" onclick="openAuthModal('register')">Create Account</button>
+        </div>
+
+        <!-- Login Form -->
+        <form id="form-login">
+          <div class="form-group">
+            <label class="form-label" for="login-email">Email Address</label>
+            <input type="email" id="login-email" class="form-control" placeholder="name@company.com" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="login-password">Password</label>
+            <input type="password" id="login-password" class="form-control" placeholder="••••••••" required />
+          </div>
+          <button type="submit" id="btn-login-submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Log In</button>
+
+          <!-- Quick Test Credentials Box -->
+          <div style="margin-top: 20px; padding: 12px; border-radius: var(--radius-sm); background: rgba(99,102,241,0.08); border: 1px dashed rgba(99,102,241,0.3); font-size: 0.8rem; text-align: center;">
+            <div style="color: #c7d2fe; font-weight: 600; margin-bottom: 6px;">⚡ Quick Test Autofill</div>
+            <div style="display:flex; gap:6px; justify-content:center;">
+              <button type="button" class="btn btn-outline btn-sm" onclick="quickDemoLogin('user')">User Demo</button>
+              <button type="button" class="btn btn-outline btn-sm" onclick="quickDemoLogin('owner')">Owner Demo</button>
+            </div>
+          </div>
+        </form>
+
+        <!-- Register Form -->
+        <form id="form-register" style="display: none;">
+          <div class="form-group">
+            <label class="form-label" for="reg-name">Full Name</label>
+            <input type="text" id="reg-name" class="form-control" placeholder="Alex Morgan" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-email">Email Address</label>
+            <input type="email" id="reg-email" class="form-control" placeholder="alex@company.com" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-password">Password (min 6 characters)</label>
+            <input type="password" id="reg-password" class="form-control" placeholder="••••••••" minlength="6" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Account Role</label>
+            <div class="role-pills">
+              <label class="role-pill-label">
+                <input type="radio" name="reg-role" value="user" checked />
+                <span>👤 Member / User</span>
+              </label>
+              <label class="role-pill-label">
+                <input type="radio" name="reg-role" value="owner" />
+                <span>👑 Space Owner</span>
+              </label>
+            </div>
+          </div>
+          <button type="submit" id="btn-reg-submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Create Account</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Owner Add/Edit Space Modal -->
+  <div id="space-modal" class="modal-backdrop">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" id="space-modal-title">List New Workspace</h3>
+        <button class="modal-close" onclick="closeModal('space-modal')">✕</button>
+      </div>
+      <form id="space-form">
+        <input type="hidden" id="space-id-input" />
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="space-name-input">Space Name</label>
+            <input type="text" id="space-name-input" class="form-control" placeholder="e.g. Skyview Meeting Pod" required />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="space-type-select">Space Type</label>
+              <select id="space-type-select" class="form-control" required>
+                <option value="hot-desk">Hot Desk</option>
+                <option value="meeting-room">Meeting Room</option>
+                <option value="private-office">Private Office</option>
+                <option value="conference-room">Conference Room</option>
+                <option value="desk">Desk</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="space-capacity-input">Capacity (Persons)</label>
+              <input type="number" id="space-capacity-input" class="form-control" min="1" placeholder="4" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="space-price-input">Price / Hour (₹)</label>
+              <input type="number" id="space-price-input" class="form-control" min="0" step="10" placeholder="350" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="space-location-input">Location / Address</label>
+              <input type="text" id="space-location-input" class="form-control" placeholder="e.g. BKC, Mumbai" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="space-desc-input">Description</label>
+            <textarea id="space-desc-input" class="form-control" rows="2" placeholder="Describe the atmosphere, equipment, and benefits..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="space-amenities-input">Amenities (comma-separated)</label>
+            <input type="text" id="space-amenities-input" class="form-control" placeholder="WiFi, 4K Screen, Whiteboard, Coffee, AC" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="space-image-input">Image URL (Optional)</label>
+            <input type="url" id="space-image-input" class="form-control" placeholder="https://images.unsplash.com/..." />
+            <div class="form-hint">Leave blank to use an automatic high-definition workspace photo.</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('space-modal')">Cancel</button>
+          <button type="submit" id="btn-save-space" class="btn btn-primary">Save Workspace</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <div class="logo">
+            <div class="logo-icon">
+              <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm6 12H6v-1.4c0-2 4-3.1 6-3.1s6 1.1 6 3.1V18z"/></svg>
+            </div>
+            <span>DeskShare</span>
+          </div>
+          <p class="footer-desc">
+            Empowering professionals and teams to collaborate effectively with state-of-the-art coworking spaces and instant booking infrastructure.
+          </p>
+        </div>
+
+        <div class="footer-links-group">
+          <div>
+            <h4 class="footer-col-title">Navigation</h4>
+            <ul class="footer-links">
+              <li><a href="#spaces" class="footer-link" onclick="navigateTo('spaces'); return false;">Browse Spaces</a></li>
+              <li><a href="#memberships" class="footer-link" onclick="navigateTo('memberships'); return false;">Membership Plans</a></li>
+              <li><a href="#dashboard" class="footer-link" onclick="navigateTo('dashboard'); return false;">Member Dashboard</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="footer-col-title">Developer & API</h4>
+            <ul class="footer-links">
+              <li><a href="/api-docs" target="_blank" class="footer-link">Swagger UI Docs</a></li>
+              <li><a href="/health" target="_blank" class="footer-link">Service Health</a></li>
+              <li><a href="/api" target="_blank" class="footer-link">API Root Status</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>© 2026 DeskShare Coworking Platform. All rights reserved.</div>
+        <div style="display:flex; gap:16px;">
+          <span>Node.js / Express</span>
+          <span>•</span>
+          <span>MongoDB Atlas</span>
+          <span>•</span>
+          <span>JWT & Firebase</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

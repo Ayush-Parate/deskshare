@@ -75,7 +75,7 @@ Update `.env` with MongoDB, JWT and Firebase credentials.
 ## Environment Variables
 
 ```env
-PORT=5000
+PORT=4000
 MONGO_URI=mongodb://127.0.0.1:27017/deskshare
 JWT_SECRET=replace_with_a_long_random_secret
 JWT_EXPIRES_IN=7d
@@ -130,17 +130,36 @@ Seed demo data:
 npm run seed
 ```
 
-API:
+Web App & UI:
 
 ```text
-http://localhost:5000
+http://localhost:4000
 ```
 
-Swagger:
+API Root:
 
 ```text
-http://localhost:5000/api-docs
+http://localhost:4000/api
 ```
+
+Swagger API Docs:
+
+```text
+http://localhost:4000/api-docs
+```
+
+## Integrated Interactive Frontend
+
+The project includes a built-in modern dark-mode web application directly served by the Express backend (`public/`):
+
+- **Workspace Browsing & Filtering**: Real-time keyword search, space type filters (Hot Desk, Meeting Room, Private Office, Conference Room), and price/capacity sorting.
+- **Interactive Space Booking**: Instant modal with date/time pickers and real-time duration and total price calculation.
+- **Automated Conflict Detection**: Immediate feedback on overlapping bookings.
+- **Monthly Memberships**: Interactive 3-tier membership purchase (Basic, Premium, Team).
+- **User Dashboard**: View and cancel upcoming bookings, check active memberships.
+- **Space Owner Portal**: List new coworking spaces, edit details, or remove listings.
+- **Quick Demo Access**: 1-click test login for both Member (`user@deskshare.com`) and Owner (`owner@deskshare.com`).
+
 
 ## Demo Credentials
 
@@ -224,7 +243,7 @@ This backend exposes REST endpoints for the main entities:
 
 Open:
 
-`http://localhost:5000/api-docs`
+`http://localhost:4000/api-docs`
 
 Import:
 
@@ -301,7 +320,7 @@ The repository already includes a Render config file: `render.yaml`.
 ```bash
 heroku create deskshare-backend
 heroku config:set \
-  PORT=5000 \
+  PORT=4000 \
   MONGO_URI="mongodb+srv://..." \
   JWT_SECRET="your-secret" \
   JWT_EXPIRES_IN=7d \

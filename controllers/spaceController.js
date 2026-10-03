@@ -23,24 +23,52 @@ exports.getSpace = async (req, res, next) => {
 
 exports.createSpace = async (req, res, next) => {
   try {
-    const { name, type, description, location, pricePerHour, capacity, amenities } = req.body;
+    const { name, type, description, location, pricePerHour, capacity, amenities, imageUrl, imageUrls: rawImageUrls } = req.body;
 
     const imageUrls = [];
+    if (rawImageUrls) {
+      if (Array.isArray(rawImageUrls)) {
+        imageUrls.push(...rawImageUrls);
+      } else if (typeof rawImageUrls === "string") {
+        try {
+          const parsed = JSON.parse(rawImageUrls);
+          if (Array.isArray(parsed)) imageUrls.push(...parsed);
+          else imageUrls.push(rawImageUrls);
+        } catch (_) {
+          imageUrls.push(...rawImageUrls.split(",").map(u => u.trim()).filter(Boolean));
+        }
+      }
+    }
+    if (imageUrl && !imageUrls.includes(imageUrl.trim())) {
+      imageUrls.push(imageUrl.trim());
+    }
+
     if (req.files?.length) {
       for (const file of req.files) {
-        imageUrls.push(await uploadImage(file));
+        try {
+          imageUrls.push(await uploadImage(file));
+        } catch (uploadErr) {
+          console.warn("Image upload failed:", uploadErr.message);
+        }
       }
+    }
+
+    let parsedAmenities = [];
+    if (Array.isArray(amenities)) {
+      parsedAmenities = amenities;
+    } else if (typeof amenities === "string") {
+      parsedAmenities = amenities.split(",").map(a => a.trim()).filter(Boolean);
     }
 
     const space = await Space.create({
       owner: req.user._id,
       name,
       type,
-      description,
+      description: description || "",
       location,
-      pricePerHour,
-      capacity,
-      amenities: Array.isArray(amenities) ? amenities : (amenities ? [amenities] : []),
+      pricePerHour: Number(pricePerHour),
+      capacity: Number(capacity),
+      amenities: parsedAmenities,
       imageUrls
     });
 
@@ -59,16 +87,34 @@ exports.updateSpace = async (req, res, next) => {
       return res.status(403).json({ success: false, message: "You cannot modify this space" });
     }
 
-    const allowed = ["name", "type", "description", "location", "pricePerHour", "capacity", "amenities", "available"];
+    const allowed = ["name", "type", "description", "location", "pricePerHour", "capacity", "available"];
     allowed.forEach((field) => {
       if (req.body[field] !== undefined) {
         space[field] = req.body[field];
       }
     });
 
+    if (req.body.amenities !== undefined) {
+      if (Array.isArray(req.body.amenities)) {
+        space.amenities = req.body.amenities;
+      } else if (typeof req.body.amenities === "string") {
+        space.amenities = req.body.amenities.split(",").map(a => a.trim()).filter(Boolean);
+      }
+    }
+
+    if (req.body.imageUrl) {
+      if (!space.imageUrls.includes(req.body.imageUrl.trim())) {
+        space.imageUrls.push(req.body.imageUrl.trim());
+      }
+    }
+
     if (req.files?.length) {
       for (const file of req.files) {
-        space.imageUrls.push(await uploadImage(file));
+        try {
+          space.imageUrls.push(await uploadImage(file));
+        } catch (uploadErr) {
+          console.warn("Image upload failed:", uploadErr.message);
+        }
       }
     }
 

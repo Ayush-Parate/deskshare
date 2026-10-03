@@ -10,7 +10,7 @@ const options = {
       description: "REST API for coworking spaces, bookings, memberships, JWT authentication and Firebase image uploads."
     },
     servers: [
-      { url: "http://localhost:5000", description: "Local development server" }
+      { url: "http://localhost:4000", description: "Local development server" }
     ],
     components: {
       securitySchemes: {

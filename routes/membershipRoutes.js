@@ -3,9 +3,21 @@ const express = require("express");
 const { body } = require("express-validator");
 const validate = require("../middleware/validationMiddleware");
 const { authenticate } = require("../middleware/authMiddleware");
-const { createMembership, getUserMemberships } = require("../controllers/membershipController");
+const { createMembership, getUserMemberships, getMyMemberships } = require("../controllers/membershipController");
 
 const router = express.Router();
+
+/**
+ * @swagger
+ * /api/memberships/my:
+ *   get:
+ *     tags: [Memberships]
+ *     security: [{ bearerAuth: [] }]
+ *     summary: Get memberships for current authenticated user
+ *     responses:
+ *       200: { description: Membership list }
+ */
+router.get("/my", authenticate, getMyMemberships);
 
 /**
  * @swagger
