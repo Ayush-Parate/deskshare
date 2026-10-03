@@ -1,0 +1,63 @@
+{
+  "info": { "name": "DeskShare API", "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json" },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5001" },
+    { "key": "token", "value": "" },
+    { "key": "spaceId", "value": "" },
+    { "key": "bookingId", "value": "" },
+    { "key": "userId", "value": "" }
+  ],
+  "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+  "item": [
+    { "name": "Auth", "item": [
+      { "name": "Register (owner)", "request": { "method": "POST", "auth": { "type": "noauth" }, "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"name\": \"Asha Owner\",\n  \"email\": \"owner@example.com\",\n  \"password\": \"secret123\",\n  \"role\": \"owner\"\n}" },
+        "url": "{{baseUrl}}/api/auth/register" },
+        "event": [{ "listen": "test", "script": { "exec": ["const r = pm.response.json();", "if (r.token) { pm.collectionVariables.set('token', r.token); pm.collectionVariables.set('userId', r.user.id); }"] } }] },
+      { "name": "Register (user)", "request": { "method": "POST", "auth": { "type": "noauth" }, "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"name\": \"Ravi Freelancer\",\n  \"email\": \"ravi@example.com\",\n  \"password\": \"secret123\"\n}" },
+        "url": "{{baseUrl}}/api/auth/register" },
+        "event": [{ "listen": "test", "script": { "exec": ["const r = pm.response.json();", "if (r.token) { pm.collectionVariables.set('token', r.token); pm.collectionVariables.set('userId', r.user.id); }"] } }] },
+      { "name": "Login", "request": { "method": "POST", "auth": { "type": "noauth" }, "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"ravi@example.com\",\n  \"password\": \"secret123\"\n}" },
+        "url": "{{baseUrl}}/api/auth/login" },
+        "event": [{ "listen": "test", "script": { "exec": ["const r = pm.response.json();", "if (r.token) { pm.collectionVariables.set('token', r.token); pm.collectionVariables.set('userId', r.user.id); }"] } }] }
+    ]},
+    { "name": "Spaces", "item": [
+      { "name": "Create space (owner token)", "request": { "method": "POST",
+        "body": { "mode": "formdata", "formdata": [
+          { "key": "name", "value": "Bandra Meeting Room A", "type": "text" },
+          { "key": "type", "value": "meeting-room", "type": "text" },
+          { "key": "city", "value": "Mumbai", "type": "text" },
+          { "key": "address", "value": "Linking Road, Bandra West", "type": "text" },
+          { "key": "description", "value": "8-seater meeting room with projector", "type": "text" },
+          { "key": "capacity", "value": "8", "type": "text" },
+          { "key": "pricePerHour", "value": "500", "type": "text" },
+          { "key": "amenities", "value": "wifi,projector,whiteboard", "type": "text" },
+          { "key": "availability", "value": "[{\"day\":1,\"open\":\"09:00\",\"close\":\"20:00\"},{\"day\":2,\"open\":\"09:00\",\"close\":\"20:00\"},{\"day\":3,\"open\":\"09:00\",\"close\":\"20:00\"},{\"day\":4,\"open\":\"09:00\",\"close\":\"20:00\"},{\"day\":5,\"open\":\"09:00\",\"close\":\"20:00\"}]", "type": "text" },
+          { "key": "images", "type": "file", "src": [] }
+        ]}, "url": "{{baseUrl}}/api/spaces" },
+        "event": [{ "listen": "test", "script": { "exec": ["const r = pm.response.json();", "if (r._id) pm.collectionVariables.set('spaceId', r._id);"] } }] },
+      { "name": "List spaces", "request": { "method": "GET", "auth": { "type": "noauth" }, "url": { "raw": "{{baseUrl}}/api/spaces?city=Mumbai&page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["api", "spaces"], "query": [{ "key": "city", "value": "Mumbai" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] } } },
+      { "name": "Search spaces", "request": { "method": "GET", "auth": { "type": "noauth" }, "url": { "raw": "{{baseUrl}}/api/spaces/search?keyword=meeting-room", "host": ["{{baseUrl}}"], "path": ["api", "spaces", "search"], "query": [{ "key": "keyword", "value": "meeting-room" }, { "key": "date", "value": "2026-10-05", "disabled": true }, { "key": "startTime", "value": "10:00", "disabled": true }, { "key": "endTime", "value": "12:00", "disabled": true }] } } },
+      { "name": "Get space by id", "request": { "method": "GET", "auth": { "type": "noauth" }, "url": "{{baseUrl}}/api/spaces/{{spaceId}}" } },
+      { "name": "Update space (owner token)", "request": { "method": "PUT",
+        "body": { "mode": "formdata", "formdata": [{ "key": "pricePerHour", "value": "450", "type": "text" }] },
+        "url": "{{baseUrl}}/api/spaces/{{spaceId}}" } }
+    ]},
+    { "name": "Bookings", "item": [
+      { "name": "Create booking", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"space\": \"{{spaceId}}\",\n  \"date\": \"2026-10-05\",\n  \"startTime\": \"10:00\",\n  \"endTime\": \"12:00\",\n  \"seats\": 2\n}" },
+        "url": "{{baseUrl}}/api/bookings" },
+        "event": [{ "listen": "test", "script": { "exec": ["const r = pm.response.json();", "if (r._id) pm.collectionVariables.set('bookingId', r._id);"] } }] },
+      { "name": "Get booking", "request": { "method": "GET", "url": "{{baseUrl}}/api/bookings/{{bookingId}}" } },
+      { "name": "Cancel booking", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/bookings/{{bookingId}}" } }
+    ]},
+    { "name": "Memberships", "item": [
+      { "name": "List plans", "request": { "method": "GET", "auth": { "type": "noauth" }, "url": "{{baseUrl}}/api/memberships/plans" } },
+      { "name": "Purchase membership", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"plan\": \"pro\"\n}" }, "url": "{{baseUrl}}/api/memberships" } },
+      { "name": "Get user memberships", "request": { "method": "GET", "url": "{{baseUrl}}/api/memberships/user/{{userId}}" } }
+    ]}
+  ]
+}
