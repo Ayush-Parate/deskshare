@@ -11,10 +11,13 @@ DeskShare is a B.Tech CSE backend case-study project for a coworking-space booki
 - Mongoose ODM
 - JWT authentication
 - Firebase Admin SDK / Firebase Authentication
-- Firebase Cloud Storage
+- Firebase Cloud Storage (with automatic local-disk fallback)
 - Multer
 - Swagger / OpenAPI
 - Postman
+- Helmet security headers
+- Express-rate-limit rate limiting
+- Automated smoke tests (Node test runner + Supertest)
 
 ## Features
 
@@ -31,6 +34,9 @@ DeskShare is a B.Tech CSE backend case-study project for a coworking-space booki
 - Swagger API documentation
 - Postman collection
 - MongoDB seed data
+- Security hardening: Helmet headers + API/authentication rate limiting
+- Graceful shutdown on SIGINT/SIGTERM
+- Local-disk image upload fallback when Firebase Storage is unavailable
 
 ## Requirements
 
@@ -128,6 +134,12 @@ Seed demo data:
 
 ```bash
 npm run seed
+```
+
+Run tests:
+
+```bash
+npm test
 ```
 
 Web App & UI:
@@ -277,12 +289,14 @@ Error response:
 ## Project Structure
 
 ```text
+app.js
 config/
 controllers/
 middleware/
 models/
 routes/
 seed/
+tests/
 utils/
 postman/
 server.js
@@ -290,6 +304,17 @@ package.json
 .env.example
 README.md
 ```
+
+## Database & Image Storage Notes
+
+Image uploads try Firebase Storage first. If Firebase is not configured, the
+storage bucket does not exist, or the upload fails, images are automatically
+stored under `public/uploads/` and served at `/uploads/<file>`.
+
+The storage bucket is derived from `FIREBASE_PROJECT_ID` when
+`FIREBASE_STORAGE_BUCKET` is missing or left as a placeholder, so the default
+value is `<FIREBASE_PROJECT_ID>.firebasestorage.app`. The bucket must exist in
+Firebase Console to use Firebase-hosted uploads.
 
 ## Deployment
 

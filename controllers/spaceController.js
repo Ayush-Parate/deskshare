@@ -4,7 +4,14 @@ const { uploadImage } = require("../utils/firebaseStorage");
 
 exports.getSpaces = async (req, res, next) => {
   try {
-    const spaces = await Space.find({ available: true }).populate("owner", "name email role");
+    // Anonymous visitors only see available spaces. An authenticated owner (or
+    // admin) also sees their own listings, including ones marked unavailable.
+    let filter = { available: true };
+    if (req.user && (req.user.role === "owner" || req.user.role === "admin")) {
+      filter = { $or: [{ available: true }, { owner: req.user._id }] };
+    }
+
+    const spaces = await Space.find(filter).populate("owner", "name email role");
     res.json({ success: true, count: spaces.length, data: spaces });
   } catch (error) {
     next(error);

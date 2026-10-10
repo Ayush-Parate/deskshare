@@ -1,7 +1,7 @@
 
 const express = require("express");
 const { body } = require("express-validator");
-const { authenticate, authorize } = require("../middleware/authMiddleware");
+const { authenticate, optionalAuth, authorize } = require("../middleware/authMiddleware");
 const validate = require("../middleware/validationMiddleware");
 const upload = require("../middleware/uploadMiddleware");
 const {
@@ -19,7 +19,7 @@ const router = express.Router();
  *     responses:
  *       200: { description: Successful response }
  */
-router.get("/", getSpaces);
+router.get("/", optionalAuth, getSpaces);
 
 /**
  * @swagger
@@ -113,7 +113,22 @@ router.post(
  *     responses:
  *       200: { description: Space updated }
  */
-router.put("/:id", authenticate, authorize("owner", "admin"), upload.array("images", 8), updateSpace);
+router.put(
+  "/:id",
+  authenticate,
+  authorize("owner", "admin"),
+  upload.array("images", 8),
+  [
+    body("name").optional().trim().notEmpty().withMessage("name cannot be empty"),
+    body("type").optional().isIn(["desk", "meeting-room", "private-office", "conference-room", "hot-desk"]),
+    body("location").optional().trim().notEmpty().withMessage("location cannot be empty"),
+    body("pricePerHour").optional().isFloat({ min: 0 }),
+    body("capacity").optional().isInt({ min: 1 }),
+    body("available").optional().isBoolean()
+  ],
+  validate,
+  updateSpace
+);
 
 /**
  * @swagger

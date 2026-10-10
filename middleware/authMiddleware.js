@@ -55,6 +55,46 @@ async function authenticate(req, res, next) {
   }
 }
 
+// Like authenticate, but never rejects the request: if a valid token is present
+// req.user is populated, otherwise the request continues as an anonymous one.
+async function optionalAuth(req, res, next) {
+  const header = req.headers.authorization || "";
+  if (!header.startsWith("Bearer ")) return next();
+
+  const token = header.substring(7);
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.userId);
+    if (user) {
+      req.user = user;
+      req.authType = "jwt";
+    }
+    return next();
+  } catch (_) {
+    // Not an application JWT; fall through and try Firebase below.
+  }
+
+  try {
+    const admin = initializeFirebase();
+    if (admin) {
+      const decodedFirebase = await admin.auth().verifyIdToken(token);
+      let user = await User.findOne({ firebaseUid: decodedFirebase.uid });
+      if (!user && decodedFirebase.email) {
+        user = await User.findOne({ email: decodedFirebase.email.toLowerCase() });
+      }
+      if (user) {
+        req.user = user;
+        req.authType = "firebase";
+      }
+    }
+  } catch (_) {
+    // Ignore invalid/expired tokens for optional auth.
+  }
+
+  return next();
+}
+
 function authorize(...roles) {
   return (req, res, next) => {
     if (!req.user || !roles.includes(req.user.role)) {
@@ -64,4 +104,4 @@ function authorize(...roles) {
   };
 }
 
-module.exports = { authenticate, authorize };
+module.exports = { authenticate, optionalAuth, authorize };

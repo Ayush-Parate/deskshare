@@ -3,6 +3,21 @@ const admin = require("firebase-admin");
 
 let firebaseReady = false;
 
+// Returns a usable storage bucket name, deriving it from the project id when the
+// env var is missing or left as a placeholder (e.g. "your-firebase-project-id.appspot.com").
+function resolveStorageBucket(projectId) {
+  const configured = (process.env.FIREBASE_STORAGE_BUCKET || "").trim();
+
+  const isPlaceholder =
+    !configured ||
+    configured.includes("your-firebase-project-id") ||
+    configured.includes("your-project-id");
+
+  if (!isPlaceholder) return configured;
+
+  return projectId ? `${projectId}.firebasestorage.app` : undefined;
+}
+
 function initializeFirebase() {
   if (firebaseReady) return admin;
 
@@ -15,6 +30,7 @@ function initializeFirebase() {
 
   try {
     const privateKey = FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n");
+    const storageBucket = resolveStorageBucket(FIREBASE_PROJECT_ID);
 
     admin.initializeApp({
       credential: admin.credential.cert({
@@ -22,7 +38,7 @@ function initializeFirebase() {
         clientEmail: FIREBASE_CLIENT_EMAIL,
         privateKey
       }),
-      storageBucket: process.env.FIREBASE_STORAGE_BUCKET
+      storageBucket
     });
 
     firebaseReady = true;

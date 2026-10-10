@@ -9,3 +9,4 @@ coverage/
 serviceAccountKey.json
 firebase-service-account.json
 uploads/
+public/uploads/
